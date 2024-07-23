@@ -1,0 +1,31 @@
+@page "/Conversation"
+@using System.Security.Cryptography
+@using OmicronSocial.Data
+@using OmicronSocial.Data.Schemas
+<h3>Conversation</h3>
+
+<p>You are @_id</p>
+
+@if (_chat == null) {
+    <p>Waiting for another user...</p>
+} else {
+    <p>Connected with @_chat.Peer</p>
+}
+
+<button class="btn btn-secondary" @onclick="StateHasChanged">Refresh</button>
+
+@code {
+    private readonly int _id = RandomNumberGenerator.GetInt32(1000000);
+    private Chat? _chat;
+
+    protected override void OnInitialized() {
+        Chats.Queue(_id, Connected);
+        Console.WriteLine("Queuing...");
+    }
+
+    private void Connected(Chat chat) {
+        _chat = chat;
+        InvokeAsync(StateHasChanged).Wait();
+        Console.WriteLine($"invoked callback, {_chat == null}");
+    }
+}
