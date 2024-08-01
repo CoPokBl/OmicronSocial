@@ -1,7 +1,9 @@
 @page "/Conversation"
+@rendermode InteractiveServer
 @using System.Security.Cryptography
 @using OmicronSocial.Data
 @using OmicronSocial.Data.Schemas
+
 <h3>Conversation</h3>
 
 <p>You are @_id</p>
@@ -9,7 +11,16 @@
 @if (_chat == null) {
     <p>Waiting for another user...</p>
 } else {
-    <p>Connected with @_chat.Peer</p>
+    <p>Connected with @_chat.NotMe(_id)</p>
+    
+    <h5>Messages:</h5>
+    @foreach((int peer, string msg) in _messages) {
+        <p>@(peer == _id ? "You" : "Peer"): @msg</p>
+    }
+    
+    <form @onsubmit="SendMessage">
+        <input class="form-control" @bind="_message"/>
+    </form>
 }
 
 <button class="btn btn-secondary" @onclick="StateHasChanged">Refresh</button>
@@ -17,15 +28,31 @@
 @code {
     private readonly int _id = RandomNumberGenerator.GetInt32(1000000);
     private Chat? _chat;
+    private readonly List<(int, string)> _messages = [];
+    private string _message = string.Empty;
 
-    protected override void OnInitialized() {
+    protected override void OnAfterRender(bool firstRender) {
+        if (!firstRender) {
+            return;
+        }
+        
         Chats.Queue(_id, Connected);
-        Console.WriteLine("Queuing...");
+        Console.WriteLine($"Queuing as {_id}...");
     }
 
     private void Connected(Chat chat) {
         _chat = chat;
+        chat.Subscribe(OnMessage);
         InvokeAsync(StateHasChanged).Wait();
-        Console.WriteLine($"invoked callback, {_chat == null}");
+    }
+
+    private void OnMessage(int peer, string msg) {
+        _messages.Add((peer, msg));
+        InvokeAsync(StateHasChanged).Wait();
+    }
+
+    private void SendMessage() {
+        _chat!.SendMessage(_id, _message);
+        _message = string.Empty;
     }
 }

@@ -1,7 +1,8 @@
 using OmicronSocial.Components;
 using OmicronSocial.Data;
 
-Chats.Init();
+CancellationTokenSource cts = new();
+Chats.Init(cts.Token);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -27,3 +28,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+cts.Cancel();
