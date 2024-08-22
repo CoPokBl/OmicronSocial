@@ -25,6 +25,7 @@ else {
         }
     
         <form @onsubmit="SendMessage">
+            <p class="text-danger">@_error</p>
             <input class="form-control" @bind="_message"/>
         </form>
     }
@@ -63,6 +64,8 @@ else {
     /// </summary>
     private User? _user;
 
+    private string _error = "";
+
     // This won't run if they aren't logged in because they have to be
     private Task OnLogin((User?, string) data) {
         _user = data.Item1;  // User won't be null if they are logged in.
@@ -87,7 +90,15 @@ else {
 
     // Listener for clicking enter
     private void SendMessage() {
+        if (_message.Length is 0 or > 512) {  // Validate message
+            _error = "Message must be between 1 and 512 characters.";
+            StateHasChanged();
+            return;
+        }
+        
         _chat!.SendMessage(_id, _message);
         _message = string.Empty;
+        _error = "";
+        StateHasChanged();
     }
 }
