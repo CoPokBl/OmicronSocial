@@ -4,6 +4,8 @@
 @using OmicronSocial.Data
 @using OmicronSocial.Data.Schemas
 
+<RequireLogin Callback="OnLogin"></RequireLogin>
+
 <h3>Conversation</h3>
 
 <p>You are @_id</p>
@@ -30,6 +32,10 @@
     private Chat? _chat;
     private readonly List<(int, string)> _messages = [];
     private string _message = string.Empty;
+
+    private async Task OnLogin((User?, string) data) {
+        
+    }
 
     protected override void OnAfterRender(bool firstRender) {
         if (!firstRender) {

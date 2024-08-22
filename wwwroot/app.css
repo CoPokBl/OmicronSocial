@@ -67,3 +67,8 @@ h1:focus {
 }
 
 html,body { height:100%; }
+
+.connect-button {
+    width: 300px;
+    height: 150px;
+}

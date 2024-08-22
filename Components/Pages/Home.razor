@@ -1,6 +1,9 @@
 ﻿@page "/"
+@using OmicronSocial.Data.Schemas
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+
+<RequireLogin RedirectToLogin="false" Callback="OnLogin"></RequireLogin>
 
 <PageTitle>Omicron Social</PageTitle>
 
@@ -12,7 +15,7 @@
             </div>
 
             <div>
-                <button class="btn btn-primary" @onclick="Connect">Connect</button>
+                <button class="connect-button btn btn-primary" @onclick="Connect">Connect</button>
             </div>
 
             <div class="p-5">
@@ -27,17 +30,28 @@
     </div>
     
     <div class="top-right">
-        <h4>Logged in:</h4>
-        <h4>CoPokBl</h4>
-        <a class="text-light" href="#">Log out</a>
+        @if (_user == null) {
+            <a class="text-light" href="#">Log in</a>
+        }
+        else {
+            <h4>Logged in:</h4>
+            <h4>CoPokBl</h4>
+            <a class="text-light" href="#">Log out</a>
+        }
     </div>
 </div>
 
 
 @code {
+    private User? _user;
 
     private void Connect() {
         Console.WriteLine("Connecting...");
         NavigationManager.NavigateTo("/Conversation");
+    }
+
+    private async Task OnLogin((User?, string) data) {
+        _user = data.Item1;
+        StateHasChanged();
     }
 }
