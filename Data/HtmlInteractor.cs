@@ -3,6 +3,9 @@ using Microsoft.JSInterop;
 
 namespace OmicronSocial.Data; 
 
+/// <summary>
+/// Helper class to interact with the JavaScript runtime in the page.
+/// </summary>
 public class HtmlInteractor {
     private readonly IJSRuntime _jsRuntime;
     

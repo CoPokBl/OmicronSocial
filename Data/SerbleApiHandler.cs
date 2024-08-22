@@ -5,6 +5,10 @@ using GeneralPurposeLib;
 using OmicronSocial.Data.Schemas;
 
 namespace OmicronSocial.Data;
+
+/// <summary>
+/// Class to interact with the Serble API.
+/// </summary>
 public static class SerbleApiHandler {
 
     public static async Task<SerbleApiResponse<User>> GetUser(string token) {

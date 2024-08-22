@@ -31,12 +31,7 @@
         _ => PageType.NonAccount
     };
 
-    public void RunCheck(Func<(User?, string), Task> callback) {
-        Callback = callback;
-        RedirectToLogin = false;
-        OnAfterRender(true);
-    }
-
+    // Try and login using any saved credentials.
     protected override async void OnAfterRender(bool firstRender) {
         if (!firstRender) return;
         Cookie cookieHandler = new (JsRuntime);
@@ -46,7 +41,7 @@
         // Check for oauth token
         string token = await cookieHandler.GetValue("refresh_token");
         if (token == "") {
-            token = "urmum";  // If no token, set to random string so it fails because invalid token
+            token = "invalid";  // If no token, set to random string so it fails because invalid token
         }
         
         // Get access token
@@ -90,13 +85,23 @@
             await htmlInteractor.Log("User is logged in as " + response.ResponseObject!.Username);
         }
         catch (Exception) {
-            // Ignore because it doesn't matter
+            // Ignore because it doesn't matter, it's just a log msg
         }
 
-        // Callback
+        // Alert the page, invoke their callback
         await Callback!.Invoke((response.ResponseObject, accessToken));
     }
     
+    /// <summary>
+    /// Run to do the not logged in process.
+    ///
+    /// If configured to display access denied, do that.
+    /// If the account is disabled, display relevent message.
+    /// If we should redirect to log in, do that [DEFAULT BEHAVIOUR].
+    /// Otherwise, run the callback with null user.
+    /// </summary>
+    /// <param name="disabledAccount">Is the user's account disabled.</param>
+    /// <returns>A Task the resolves when we have performed our process.</returns>
     private async Task NotLoggedIn(bool disabledAccount = false) {
         // Redirect if redirect is enabled
         HtmlInteractor htmlInteractor = new(JsRuntime);
@@ -119,6 +124,9 @@
         await Callback!.Invoke((null, ""));
     }
     
+    /// <summary>
+    /// Try and perform the OAuth process with Serble.
+    /// </summary>
     private async Task AttemptOAuth() {
         HtmlInteractor htmlInteractor = new(JsRuntime);
         await htmlInteractor.Log("Attempting OAuth...");

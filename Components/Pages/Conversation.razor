@@ -8,55 +8,84 @@
 
 <h3>Conversation</h3>
 
-<p>You are @_id</p>
+@if (_user == null) {
+    <p>Loading...</p>
+}
+else {
+    <p>You are @_id</p>
 
-@if (_chat == null) {
-    <p>Waiting for another user...</p>
-} else {
-    <p>Connected with @_chat.NotMe(_id)</p>
+    @if (_chat == null) {
+        <p>Waiting for another user...</p>
+    } else {
+        <p>Connected with @_chat.NotMe(_id)</p>
     
-    <h5>Messages:</h5>
-    @foreach((int peer, string msg) in _messages) {
-        <p>@(peer == _id ? "You" : "Peer"): @msg</p>
+        <h5>Messages:</h5>
+        @foreach((int peer, string msg) in _messages) {
+            <p>@(peer == _id ? "You" : "Peer"): @msg</p>
+        }
+    
+        <form @onsubmit="SendMessage">
+            <input class="form-control" @bind="_message"/>
+        </form>
     }
-    
-    <form @onsubmit="SendMessage">
-        <input class="form-control" @bind="_message"/>
-    </form>
+
+    <button class="btn btn-secondary" @onclick="StateHasChanged">Refresh</button>
 }
 
-<button class="btn btn-secondary" @onclick="StateHasChanged">Refresh</button>
-
 @code {
+    /// <summary>
+    /// Give ourselves a random ID, so we can be identified.
+    /// </summary>
     private readonly int _id = RandomNumberGenerator.GetInt32(1000000);
+    
+    /// <summary>
+    /// The current chat, or null if we haven't started a chat yet.
+    /// </summary>
     private Chat? _chat;
+    
+    /// <summary>
+    /// The list of messages that have been sent.
+    /// Includes the sender ID and the message.
+    /// </summary>
     private readonly List<(int, string)> _messages = [];
+    
+    /// <summary>
+    /// The message currently waiting being sent.
+    /// This is bound to the HTML input element.
+    /// </summary>
     private string _message = string.Empty;
 
-    private async Task OnLogin((User?, string) data) {
-        
-    }
+    /// <summary>
+    /// The currently logged-in user.
+    /// Null if the login process has not completed.
+    ///
+    /// Don't do anything until this completes.
+    /// </summary>
+    private User? _user;
 
-    protected override void OnAfterRender(bool firstRender) {
-        if (!firstRender) {
-            return;
-        }
+    // This won't run if they aren't logged in because they have to be
+    private Task OnLogin((User?, string) data) {
+        _user = data.Item1;  // User won't be null if they are logged in.
         
         Chats.Queue(_id, Connected);
         Console.WriteLine($"Queuing as {_id}...");
+        return Task.CompletedTask;
     }
 
+    // When we connect to a chat
     private void Connected(Chat chat) {
         _chat = chat;
         chat.Subscribe(OnMessage);
         InvokeAsync(StateHasChanged).Wait();
     }
 
+    // When we receive a message (Including from ourselves)
     private void OnMessage(int peer, string msg) {
         _messages.Add((peer, msg));
         InvokeAsync(StateHasChanged).Wait();
     }
 
+    // Listener for clicking enter
     private void SendMessage() {
         _chat!.SendMessage(_id, _message);
         _message = string.Empty;

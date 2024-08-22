@@ -14,7 +14,7 @@
 @code {
     private string _state = "";
     
-    // OnAfterRenderAsync
+    // At this point we can get the OAuth query parameters and try and do a code exchange.
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (!firstRender) {
             return;
@@ -26,7 +26,7 @@
         string? code = query["code"];
         string? state = query["state"];
         string? authorized = query["authorized"];
-        string? stateFromStorage = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "oauth_state");
+        string stateFromStorage = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "oauth_state");
         await htmlInteractor.Log("OAuth Code: " + code);
         await htmlInteractor.Log("OAuth Authorized: " + authorized);
         await htmlInteractor.Log("OAuth State: " + state);
@@ -65,12 +65,6 @@
 
         // Save refresh token
         string sessionId = Guid.NewGuid().ToString();
-        // StoredUser storedUser = new() {
-        //     RefreshToken = response.ResponseObject.Item1,
-        //     Id = user.Id!,
-        //     SessionId = sessionId,
-        //     UsedTokens = 0
-        // };
 
         StoredUser? existingUser = await Program.StorageManager.GetUser(user.Id!);
         StoredUser storedUser = existingUser ?? new StoredUser {

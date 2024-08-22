@@ -1,15 +1,4 @@
-namespace OmicronSocial.Data.Schemas; 
-
-public enum BootstrapColor {
-    Default,
-    Primary,
-    Secondary,
-    Success,
-    Info,
-    Warning,
-    Danger,
-    Link
-}
+namespace OmicronSocial.Data.Schemas;
 
 public enum AccountAccessLevel {
     Disabled = 0,

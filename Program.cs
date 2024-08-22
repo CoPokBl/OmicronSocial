@@ -8,7 +8,7 @@ namespace OmicronSocial;
 
 internal class Program {
     public static IStorageManager StorageManager { get; private set; } = null!;
-    private static readonly Dictionary<string, Property> DefaultConfig = new() {
+    private static readonly Dictionary<string, Property> DefaultConfig = new() {  // Will be copied to config.json
         { "mysql_host", "mysql.serble.net" },
         { "mysql_user", "omicron" },
         { "mysql_pass", "omicron" },
@@ -22,27 +22,26 @@ internal class Program {
     public static void Main(string[] args) {
         Logger.Init(LogLevel.Debug);
         
-        Config config = new(DefaultConfig);
-        GlobalConfig.Init(config);
+        Config config = new(DefaultConfig);  // Load the config
+        GlobalConfig.Init(config);  // Global config so we can access it from everywhere
         
-        StorageManager = new MySqlStorage();
+        StorageManager = new MySqlStorage();  // Init the storage manager
         StorageManager.Init();
         
         CancellationTokenSource cts = new();
-        Chats.Init(cts.Token);
+        Chats.Init(cts.Token);  // Init the Chat service
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+        // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
         WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+        // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment()) {
             app.UseExceptionHandler("/Error", createScopeForErrors: true);
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
 
@@ -54,7 +53,10 @@ internal class Program {
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
 
+        // This blocks until the app exits
         app.Run();
+        
+        // Stop the chat service before exiting
         cts.Cancel();
     }
 }

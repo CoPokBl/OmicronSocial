@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace OmicronSocial.Data.Schemas; 
 
+/// <summary>
+/// The schema for a Serble API user.
+/// </summary>
 public class User {
     
     [JsonPropertyName("id")]

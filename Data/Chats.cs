@@ -4,21 +4,39 @@ using OmicronSocial.Data.Schemas;
 
 namespace OmicronSocial.Data;
 
+/// <summary>
+/// Class for managing queues of users to chat with each other.
+/// </summary>
 public static class Chats {
     private static readonly ConcurrentQueue<(int, Action<Chat>)> ChatQueue = new();
     private static readonly ConcurrentBag<Chat> OngoingChats = [];
-    private static CancellationToken _cancellationToken;
+    private static CancellationToken _cancellationToken;  // Cancel to stop all queues.
 
+    /// <summary>
+    /// Start the service.
+    /// </summary>
+    /// <param name="token">Token to use for stopping the service.</param>
     public static void Init(CancellationToken token) {
         _cancellationToken = token;
         Thread connectorThread = new(ConnectorLoop);
         connectorThread.Start();
     }
     
+    /// <summary>
+    /// Add a user to the queue.
+    /// </summary>
+    /// <param name="id">The ID of the user.</param>
+    /// <param name="callback">Callback for when the user is connected with another user.</param>
     public static void Queue(int id, Action<Chat> callback) {
         ChatQueue.Enqueue((id, callback));
     }
 
+    /// <summary>
+    /// Loop for queuing users.
+    /// </summary>
+    /// <remarks>
+    /// This method won't exit until our cancellation token is cancelled.
+    /// </remarks>
     private static void ConnectorLoop() {
         while (!_cancellationToken.IsCancellationRequested) {
             if (ChatQueue.Count < 2) {

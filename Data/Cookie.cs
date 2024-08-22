@@ -2,6 +2,11 @@ using Microsoft.JSInterop;
 
 namespace OmicronSocial.Data;
 
+/// <summary>
+/// Helper class to manage cookies in the website.
+///
+/// Requires a reference to an IJSRuntime to work.
+/// </summary>
 public class Cookie {
     readonly IJSRuntime _jsRuntime;
     string _expires = "";

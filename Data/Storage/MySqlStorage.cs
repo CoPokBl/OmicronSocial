@@ -30,10 +30,6 @@ public class MySqlStorage : IStorageManager {
         await MySqlHelper.ExecuteNonQueryAsync(_connectionString, statement);
     }
 
-    public void Deinit() {
-        Logger.Info("De-initialised MySQL");
-    }
-
     public Task CreateUser(StoredUser user) {
         return SendMySqlStatement($"INSERT INTO users (id, session_id, refresh_token, is_banned) VALUES ('{user.Id}', '{user.SessionId}', '{user.RefreshToken}', {user.IsBanned})");
     }
