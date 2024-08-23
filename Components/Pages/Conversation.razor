@@ -72,6 +72,7 @@ else {
         
         Chats.Queue(_id, Connected);
         Console.WriteLine($"Queuing as {_id}...");
+        StateHasChanged();
         return Task.CompletedTask;
     }
 

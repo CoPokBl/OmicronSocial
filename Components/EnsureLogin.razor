@@ -1,0 +1,16 @@
+@page "/EnsureLogin"
+@using OmicronSocial.Data.Schemas
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<RequireLogin Callback="OnLogin"></RequireLogin>
+
+<h3>Loading...</h3>
+
+@code {
+
+    private Task OnLogin((User?, string) arg) {
+        NavigationManager.NavigateTo("/");
+        return Task.CompletedTask;
+    }
+}
